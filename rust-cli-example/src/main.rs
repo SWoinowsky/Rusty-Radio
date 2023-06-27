@@ -105,7 +105,6 @@ fn main()  -> Result<(), Box<dyn std::error::Error>>  {
                         .border_type(BorderType::Plain),
                 );
 
-            rect.render_widget(copyright, chunks[2]);
 
             let menu = menu_titles
                 .iter()
@@ -131,5 +130,8 @@ fn main()  -> Result<(), Box<dyn std::error::Error>>  {
                 .divider(Span::raw("|"));
 
             rect.render_widget(tabs, chunks[0]);
+
+            rect.render_widget(copyright, chunks[2]);
+
 
 }
