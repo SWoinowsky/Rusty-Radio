@@ -23,6 +23,11 @@ pub enum Error {
     ParseDBError(#[from] serde_json::Error),
 }
 
+enum Event<I> {
+    Input(I),
+    Tick,
+}
+
 fn main() {
     println!("Hello, world!");
 }
