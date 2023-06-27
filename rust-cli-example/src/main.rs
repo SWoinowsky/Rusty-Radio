@@ -4,6 +4,7 @@ use chrono::{DateTime, Utc};
 use serde::{Serialize, Deserialize};
 use crossterm::{terminal, event};
 use thiserror::Error;
+use tui::{backend::CrosstermBackend, Terminal};
 
 const DB_PATH: &str = "./data/db.json";
 
@@ -47,7 +48,7 @@ fn main()  -> Result<(), Box<dyn std::error::Error>>  {
     terminal::enable_raw_mode().expect("can run in raw mode");
 
     let (tx, rx) = mpsc::channel();
-    let tick_rate = Duration::from_millis(200);
+    let tick_rate = Duration::from_millis(200); // This is going to be the tick rate, how fast/frequently it checks for input
     thread::spawn(move || {
         let mut last_tick = Instant::now();
         loop {
@@ -68,5 +69,10 @@ fn main()  -> Result<(), Box<dyn std::error::Error>>  {
             }
         }
     });
+
+    let stdout = io::stdout();
+    let backend = CrosstermBackend::new(stdout);
+    let mut terminal = Terminal::new(backend)?;
+    terminal.clear()?;
 
 }
