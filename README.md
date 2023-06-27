@@ -7,5 +7,5 @@ When I was in highschool, I was absolutely enthralled by small computer systems 
 # What's to see here?
 I'll be documenting what I do, what I find, and how I take steps to learning to do this project as a notebook for myself and a roadmap for people interested in making their own.
 
-## Learning TUI
+# Learning TUI
 Here I'll be following [This Tutorial](https://blog.logrocket.com/rust-and-tui-building-a-command-line-interface-in-rust/) by a Mario Zupan. The summarized goal is to figure out how to use TUI the TUI framework with Crossterm running everything behind-the-scenes.
