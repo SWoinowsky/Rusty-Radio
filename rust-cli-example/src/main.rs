@@ -4,7 +4,7 @@ use chrono::{DateTime, Utc};
 use serde::{Serialize, Deserialize};
 use crossterm::{terminal, event};
 use thiserror::Error;
-use tui::{backend::CrosstermBackend, Terminal};
+use tui::{backend::CrosstermBackend, Terminal, widgets, text, style, layout};
 
 const DB_PATH: &str = "./data/db.json";
 
@@ -81,28 +81,28 @@ fn main()  -> Result<(), Box<dyn std::error::Error>>  {
     loop {
         terminal.draw(|rect| {
             let size = rect.size();
-            let chunks = Layout::default()
-                .direction(Direction::Vertical)
+            let chunks = layout::Layout::default()
+                .direction(layout::Direction::Vertical)
                 .margin(2)
                 .constraints(
                     [
-                        Constraint::Length(3),
-                        Constraint::Min(2),
-                        Constraint::Length(3),
+                        layout::Constraint::Length(3),
+                        layout::Constraint::Min(2),
+                        layout::Constraint::Length(3),
                     ]
                     .as_ref(),
                 )
                 .split(size);
 
-            let copyright = Paragraph::new("pet-CLI 2020 - all rights reserved")
-                .style(Style::default().fg(Color::LightCyan))
-                .alignment(Alignment::Center)
+            let copyright = widgets::Paragraph::new("pet-CLI 2020 - all rights reserved")
+                .style(style::Style::default().fg(style::Color::LightCyan))
+                .alignment(layout::Alignment::Center)
                 .block(
-                    Block::default()
-                        .borders(Borders::ALL)
-                        .style(Style::default().fg(Color::White))
+                    widgets::Block::default()
+                        .borders(widgets::Borders::ALL)
+                        .style(style::Style::default().fg(style::Color::White))
                         .title("Copyright")
-                        .border_type(BorderType::Plain),
+                        .border_type(widgets::BorderType::Plain),
                 );
 
 
@@ -110,28 +110,44 @@ fn main()  -> Result<(), Box<dyn std::error::Error>>  {
                 .iter()
                 .map(|t| {
                     let (first, rest) = t.split_at(1);
-                    Spans::from(vec![
-                        Span::styled(
+                    text::Spans::from(vec![
+                        text::Span::styled(
                             first,
-                            Style::default()
-                                .fg(Color::Yellow)
-                                .add_modifier(Modifier::UNDERLINED),
+                            style::Style::default()
+                                .fg(style::Color::Yellow)
+                                .add_modifier(style::Modifier::UNDERLINED),
                         ),
-                        Span::styled(rest, Style::default().fg(Color::White)),
+                        text::Span::styled(rest, style::Style::default().fg(style::Color::White)),
                     ])
                 })
                 .collect();
 
-            let tabs = Tabs::new(menu)
+            let tabs = widgets::Tabs::new(menu)
                 .select(active_menu_item.into())
-                .block(Block::default().title("Menu").borders(Borders::ALL))
-                .style(Style::default().fg(Color::White))
-                .highlight_style(Style::default().fg(Color::Yellow))
-                .divider(Span::raw("|"));
+                .block(widgets::Block::default().title("Menu").borders(widgets::Borders::ALL))
+                .style(style::Style::default().fg(style::Color::White))
+                .highlight_style(style::Style::default().fg(style::Color::Yellow))
+                .divider(text::Span::raw("|"));
 
             rect.render_widget(tabs, chunks[0]);
 
             rect.render_widget(copyright, chunks[2]);
+        })?;
 
+        match rx.recv()? {
+            Event::Input(event) => match event.code {
+                event::KeyCode::Char('q') => {
+                    terminal::disable_raw_mode()?;
+                    terminal.show_cursor()?;
+                    break;
+                }
+                event::KeyCode::Char('h') => active_menu_item = MenuItem::Home,
+                event::KeyCode::Char('p') => active_menu_item = MenuItem::Pets,
+                _ => {}
+            },
+            Event::Tick => {}
+        }
+    }
 
+    Ok(());
 }
