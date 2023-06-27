@@ -1,10 +1,26 @@
-
-use std::{io, sync::mpsc, thread, time::{Instant, Duration}};
-use chrono::{DateTime, Utc};
-use serde::{Serialize, Deserialize};
-use crossterm::{terminal, event};
+use chrono::prelude::*;
+use crossterm::{
+    event::{self, Event as CEvent, KeyCode},
+    terminal::{disable_raw_mode, enable_raw_mode},
+};
+use rand::{distributions::Alphanumeric, prelude::*};
+use serde::{Deserialize, Serialize};
+use std::fs;
+use std::io;
+use std::sync::mpsc;
+use std::thread;
+use std::time::{Duration, Instant};
 use thiserror::Error;
-use tui::{backend::CrosstermBackend, Terminal, widgets, text, style, layout};
+use tui::{
+    backend::CrosstermBackend,
+    layout::{Alignment, Constraint, Direction, Layout},
+    style::{Color, Modifier, Style},
+    text::{Span, Spans},
+    widgets::{
+        Block, BorderType, Borders, Cell, List, ListItem, ListState, Paragraph, Row, Table, Tabs,
+    },
+    Terminal,
+};
 
 const DB_PATH: &str = "./data/db.json";
 
@@ -30,6 +46,7 @@ enum Event<I> {
     Tick,
 }
 
+#[derive(Copy, Clone, Debug)]
 enum MenuItem {
     Home,
     Pets,
@@ -45,7 +62,7 @@ impl From<MenuItem> for usize {
 }
 
 fn main()  -> Result<(), Box<dyn std::error::Error>>  {
-    terminal::enable_raw_mode().expect("can run in raw mode");
+    enable_raw_mode().expect("can run in raw mode");
 
     let (tx, rx) = mpsc::channel();
     let tick_rate = Duration::from_millis(200); // This is going to be the tick rate, how fast/frequently it checks for input
@@ -81,28 +98,28 @@ fn main()  -> Result<(), Box<dyn std::error::Error>>  {
     loop {
         terminal.draw(|rect| {
             let size = rect.size();
-            let chunks = layout::Layout::default()
-                .direction(layout::Direction::Vertical)
+            let chunks = Layout::default()
+                .direction(Direction::Vertical)
                 .margin(2)
                 .constraints(
                     [
-                        layout::Constraint::Length(3),
-                        layout::Constraint::Min(2),
-                        layout::Constraint::Length(3),
+                        Constraint::Length(3),
+                        Constraint::Min(2),
+                        Constraint::Length(3),
                     ]
                     .as_ref(),
                 )
                 .split(size);
 
-            let copyright = widgets::Paragraph::new("pet-CLI 2020 - all rights reserved")
-                .style(style::Style::default().fg(style::Color::LightCyan))
-                .alignment(layout::Alignment::Center)
+            let copyright = Paragraph::new("pet-CLI 2020 - all rights reserved")
+                .style(Style::default().fg(Color::LightCyan))
+                .alignment(Alignment::Center)
                 .block(
-                    widgets::Block::default()
-                        .borders(widgets::Borders::ALL)
-                        .style(style::Style::default().fg(style::Color::White))
+                    Block::default()
+                        .borders(Borders::ALL)
+                        .style(Style::default().fg(Color::White))
                         .title("Copyright")
-                        .border_type(widgets::BorderType::Plain),
+                        .border_type(BorderType::Plain),
                 );
 
 
@@ -110,26 +127,33 @@ fn main()  -> Result<(), Box<dyn std::error::Error>>  {
                 .iter()
                 .map(|t| {
                     let (first, rest) = t.split_at(1);
-                    text::Spans::from(vec![
-                        text::Span::styled(
+                    Spans::from(vec![
+                        Span::styled(
                             first,
-                            style::Style::default()
-                                .fg(style::Color::Yellow)
-                                .add_modifier(style::Modifier::UNDERLINED),
+                            Style::default()
+                                .fg(Color::Yellow)
+                                .add_modifier(Modifier::UNDERLINED),
                         ),
-                        text::Span::styled(rest, style::Style::default().fg(style::Color::White)),
+                        Span::styled(rest, Style::default().fg(Color::White)),
                     ])
                 })
                 .collect();
 
-            let tabs = widgets::Tabs::new(menu)
+            let tabs = Tabs::new(menu)
                 .select(active_menu_item.into())
-                .block(widgets::Block::default().title("Menu").borders(widgets::Borders::ALL))
-                .style(style::Style::default().fg(style::Color::White))
-                .highlight_style(style::Style::default().fg(style::Color::Yellow))
-                .divider(text::Span::raw("|"));
+                .block(Block::default().title("Menu").borders(Borders::ALL))
+                .style(Style::default().fg(Color::White))
+                .highlight_style(Style::default().fg(Color::Yellow))
+                .divider(Span::raw("|"));
 
             rect.render_widget(tabs, chunks[0]);
+
+            match active_menu_item {
+                MenuItem::Home => rect.render_widget(render_home(), chunks[1]),
+                MenuItem::Pets => {
+                
+                }
+            }
 
             rect.render_widget(copyright, chunks[2]);
         })?;
@@ -137,7 +161,7 @@ fn main()  -> Result<(), Box<dyn std::error::Error>>  {
         match rx.recv()? {
             Event::Input(event) => match event.code {
                 event::KeyCode::Char('q') => {
-                    terminal::disable_raw_mode()?;
+                    disable_raw_mode()?;
                     terminal.show_cursor()?;
                     break;
                 }
@@ -150,4 +174,30 @@ fn main()  -> Result<(), Box<dyn std::error::Error>>  {
     }
 
     Ok(())
+}
+
+
+fn render_home<'a>() -> Paragraph<'a> {
+    let home = Paragraph::new(vec![
+        Spans::from(vec![Span::raw("")]),
+        Spans::from(vec![Span::raw("Welcome")]),
+        Spans::from(vec![Span::raw("")]),
+        Spans::from(vec![Span::raw("to")]),
+        Spans::from(vec![Span::raw("")]),
+        Spans::from(vec![Span::styled(
+            "pet-CLI",
+            Style::default().fg(Color::LightBlue),
+        )]),
+        Spans::from(vec![Span::raw("")]),
+        Spans::from(vec![Span::raw("Press 'p' to access pets, 'a' to add random new pets and 'd' to delete the currently selected pet.")]),
+    ])
+    .alignment(Alignment::Center)
+    .block(
+        Block::default()
+            .borders(Borders::ALL)
+            .style(Style::default().fg(Color::White))
+            .title("Home")
+            .border_type(BorderType::Plain),
+    );
+    home
 }
