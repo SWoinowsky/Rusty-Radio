@@ -74,7 +74,7 @@ fn main()  -> Result<(), Box<dyn std::error::Error>>  {
                 .unwrap_or_else(|| Duration::from_secs(0));
 
             if event::poll(timeout).expect("poll works") {
-                if let event::Event::Key(key) = event::read().expect("can read events") {
+                if let CEvent::Key(key) = event::read().expect("can read events") {
                     tx.send(Event::Input(key)).expect("can send events");
                 }
             }
@@ -94,6 +94,8 @@ fn main()  -> Result<(), Box<dyn std::error::Error>>  {
 
     let menu_titles = vec!["Home", "Pets", "Add", "Delete", "Quit"];
     let mut active_menu_item = MenuItem::Home;
+    let mut pet_list_state = ListState::default();
+    pet_list_state.select(Some(0));
 
     loop {
         terminal.draw(|rect| {
@@ -151,7 +153,15 @@ fn main()  -> Result<(), Box<dyn std::error::Error>>  {
             match active_menu_item {
                 MenuItem::Home => rect.render_widget(render_home(), chunks[1]),
                 MenuItem::Pets => {
-                
+                    let pets_chunks = Layout::default()
+                        .direction(Direction::Horizontal)
+                        .constraints(
+                            [Constraint::Percentage(20), Constraint::Percentage(80)].as_ref(),
+                        )
+                        .split(chunks[1]);
+                    let (left, right) = render_pets(&pet_list_state);
+                    rect.render_stateful_widget(left, pets_chunks[0], &mut pet_list_state);
+                    rect.render_widget(right, pets_chunks[1]);
                 }
             }
 
@@ -160,13 +170,13 @@ fn main()  -> Result<(), Box<dyn std::error::Error>>  {
 
         match rx.recv()? {
             Event::Input(event) => match event.code {
-                event::KeyCode::Char('q') => {
+                KeyCode::Char('q') => {
                     disable_raw_mode()?;
                     terminal.show_cursor()?;
                     break;
                 }
-                event::KeyCode::Char('h') => active_menu_item = MenuItem::Home,
-                event::KeyCode::Char('p') => active_menu_item = MenuItem::Pets,
+                KeyCode::Char('h') => active_menu_item = MenuItem::Home,
+                KeyCode::Char('p') => active_menu_item = MenuItem::Pets,
                 _ => {}
             },
             Event::Tick => {}
@@ -200,4 +210,91 @@ fn render_home<'a>() -> Paragraph<'a> {
             .border_type(BorderType::Plain),
     );
     home
+}
+
+fn read_db() -> Result<Vec<Pet>, Error> {
+    let db_content = fs::read_to_string(DB_PATH)?;
+    let parsed: Vec<Pet> = serde_json::from_str(&db_content)?;
+    Ok(parsed)
+}
+
+fn render_pets<'a>(pet_list_state: &ListState) -> (List<'a>, Table<'a>) {
+    let pets = Block::default()
+        .borders(Borders::ALL)
+        .style(Style::default().fg(Color::White))
+        .title("Pets")
+        .border_type(BorderType::Plain);
+
+    let pet_list = read_db().expect("can fetch pet list");
+    let items: Vec<_> = pet_list
+        .iter()
+        .map(|pet| {
+            ListItem::new(Spans::from(vec![Span::styled(
+                pet.name.clone(),
+                Style::default(),
+            )]))
+        })
+        .collect();
+
+    let selected_pet = pet_list
+        .get(
+            pet_list_state
+                .selected()
+                .expect("there is always a selected pet"),
+        )
+        .expect("exists")
+        .clone();
+
+    let list = List::new(items).block(pets).highlight_style(
+        Style::default()
+            .bg(Color::Yellow)
+            .fg(Color::Black)
+            .add_modifier(Modifier::BOLD),
+    );
+
+    let pet_detail = Table::new(vec![Row::new(vec![
+        Cell::from(Span::raw(selected_pet.id.to_string())),
+        Cell::from(Span::raw(selected_pet.name)),
+        Cell::from(Span::raw(selected_pet.category)),
+        Cell::from(Span::raw(selected_pet.age.to_string())),
+        Cell::from(Span::raw(selected_pet.created_at.to_string())),
+    ])])
+    .header(Row::new(vec![
+        Cell::from(Span::styled(
+            "ID",
+            Style::default().add_modifier(Modifier::BOLD),
+        )),
+        Cell::from(Span::styled(
+            "Name",
+            Style::default().add_modifier(Modifier::BOLD),
+        )),
+        Cell::from(Span::styled(
+            "Category",
+            Style::default().add_modifier(Modifier::BOLD),
+        )),
+        Cell::from(Span::styled(
+            "Age",
+            Style::default().add_modifier(Modifier::BOLD),
+        )),
+        Cell::from(Span::styled(
+            "Created At",
+            Style::default().add_modifier(Modifier::BOLD),
+        )),
+    ]))
+    .block(
+        Block::default()
+            .borders(Borders::ALL)
+            .style(Style::default().fg(Color::White))
+            .title("Detail")
+            .border_type(BorderType::Plain),
+    )
+    .widths(&[
+        Constraint::Percentage(5),
+        Constraint::Percentage(20),
+        Constraint::Percentage(20),
+        Constraint::Percentage(5),
+        Constraint::Percentage(20),
+    ]);
+
+    (list, pet_detail)
 }

@@ -56,3 +56,5 @@ So now I've got in some things that were shown to be very important for handling
 How cute!
 ![progress pic](https://i.imgur.com/FMIi2vr.png) 
 
+### Rendering the Pets Menu
+So we've added some actual process to the Pets result match, creating a pair of chunks out of the center of the chunks array. Then we're onto adding the process of providing the render_pets() method. It's taking a list state and returning a tuple of a list and a table.
