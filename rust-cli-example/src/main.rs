@@ -103,4 +103,5 @@ fn main()  -> Result<(), Box<dyn std::error::Error>>  {
                 );
 
             rect.render_widget(copyright, chunks[2]);
+            
 }
