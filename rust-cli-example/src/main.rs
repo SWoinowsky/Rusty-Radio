@@ -177,6 +177,32 @@ fn main()  -> Result<(), Box<dyn std::error::Error>>  {
                 }
                 KeyCode::Char('h') => active_menu_item = MenuItem::Home,
                 KeyCode::Char('p') => active_menu_item = MenuItem::Pets,
+                KeyCode::Char('a') => {
+                    add_random_pet_to_db().expect("can add new random pet");
+                },
+                KeyCode::Char('d') => {
+                    remove_pet_at_index(&mut pet_list_state).expect("can remove pet");
+                },
+                KeyCode::Down => {
+                    if let Some(selected) = pet_list_state.selected() {
+                        let amount_pets = read_db().expect("can fetch pet list").len();
+                        if selected >= amount_pets - 1 {
+                            pet_list_state.select(Some(0));
+                        } else {
+                            pet_list_state.select(Some(selected + 1));
+                        }
+                    }
+                },
+                KeyCode::Up => {
+                    if let Some(selected) = pet_list_state.selected() {
+                        let amount_pets = read_db().expect("can fetch pet list").len();
+                        if selected > 0 {
+                            pet_list_state.select(Some(selected - 1));
+                        } else {
+                            pet_list_state.select(Some(amount_pets - 1));
+                        }
+                    }
+                },
                 _ => {}
             },
             Event::Tick => {}
@@ -297,4 +323,37 @@ fn render_pets<'a>(pet_list_state: &ListState) -> (List<'a>, Table<'a>) {
     ]);
 
     (list, pet_detail)
+}
+
+fn add_random_pet_to_db() -> Result<Vec<Pet>, Error> {
+    let mut rng = rand::thread_rng();
+    let db_content = fs::read_to_string(DB_PATH)?;
+    let mut parsed: Vec<Pet> = serde_json::from_str(&db_content)?;
+    let catsdogs = match rng.gen_range(0, 1) {
+        0 => "cats",
+        _ => "dogs",
+    };
+
+    let random_pet = Pet {
+        id: rng.gen_range(0, 9999999),
+        name: rng.sample_iter(Alphanumeric).take(10).collect(),
+        category: catsdogs.to_owned(),
+        age: rng.gen_range(1, 15),
+        created_at: Utc::now(),
+    };
+
+    parsed.push(random_pet);
+    fs::write(DB_PATH, &serde_json::to_vec(&parsed)?)?;
+    Ok(parsed)
+}
+
+fn remove_pet_at_index(pet_list_state: &mut ListState) -> Result<(), Error> {
+    if let Some(selected) = pet_list_state.selected() {
+        let db_content = fs::read_to_string(DB_PATH)?;
+        let mut parsed: Vec<Pet> = serde_json::from_str(&db_content)?;
+        parsed.remove(selected);
+        fs::write(DB_PATH, &serde_json::to_vec(&parsed)?)?;
+        pet_list_state.select(Some(selected - 1));
+    }
+    Ok(())
 }

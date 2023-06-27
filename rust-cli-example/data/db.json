@@ -1,9 +1,1 @@
-[
-    {
-        "id": 1,
-        "name": "Chip",
-        "category": "cats",
-        "age": 4,
-        "created_at": "2020-09-01T12:00:00Z"
-    }
-]
+[{"id":3865034,"name":"SM00zhAb3W","category":"cats","age":12,"created_at":"2023-06-27T18:10:50.635733670Z"},{"id":6848928,"name":"WNWunDuCPL","category":"cats","age":3,"created_at":"2023-06-27T18:10:52.414983865Z"},{"id":5135057,"name":"cO1dXT6z4h","category":"cats","age":6,"created_at":"2023-06-27T18:10:58.899617061Z"}]
