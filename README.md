@@ -48,4 +48,11 @@ So here we have a goal of setting up tabs to help with visual navigation of the 
 Then we create a menu object after our draw loop. From what I can gather, the logic is to create a list of span objects from the menu_titles vector. The first one created (the 'home' span) will be styled differently from the other ones. Then we create a Tabs object from the list of spans we made, with the styling and everything specified. Then we call the tabs to be rendered as the first section of the display. This ends up being our "header."
 
 ## The Meat and Potatoes
+
+### Setting Up the Input Checks
 So now I've got in some things that were shown to be very important for handling input. We've got a check for rx.recv(). This is the receiving end of the channel we created earlier, and is basically mapping all of the controls / inputs for our app. I've also added a render_home() function that renders the desired display for the home menu option.
+
+### Progress so far
+How cute!
+![progress pic](https://i.imgur.com/FMIi2vr.png) 
+
