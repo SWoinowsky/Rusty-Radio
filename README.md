@@ -74,3 +74,6 @@ This is great! I found a library that can create a Duration type given a file. T
 
 ### Getting the Rest of It
 So it turns out, just like there is an "mp3_duration" crate, there is an "mp3_duration" crate. I don't think it'll work on non-mp3 files, but we're not exactly getting paid here. Baby steps. Next, we'll see about having it read multiple files.
+
+## Playing Multiple Songs
+Fantastic news. I've made the ugliest little algorithm on earth. I can't wait to clean it up. Regardless, I've got it playing an entire list of songs, so long as they are files. So now we have this super ugly for loop that can read mp3 files and occasionally find their audio tags. I suppose the next step would be to make sure it only works with mp3 files. And probably clean up main.
