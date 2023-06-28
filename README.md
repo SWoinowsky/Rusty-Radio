@@ -68,3 +68,6 @@ So I did a little digging into other people who've done basically what I have se
 
 ## Getting Started
 I've started by setting up the code found on the rodio docs. Works like a charm when you're not in WSL. *I can't imagine why.* Anyways, it works great as-is if you're interested in hard-coding your music, and only listening to thirty seconds of one song. Next step is to get it to play the whole song, regardless of its length.
+
+### Audio length collection
+This is great! I found a library that can create a Duration type given a file. The tragedy here is that if I wanna make this thing useful as a music player, I think I'm gonna want more than that. My goal now is to find some library that shows media file metadata.
