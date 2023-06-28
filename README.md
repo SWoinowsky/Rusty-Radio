@@ -65,3 +65,6 @@ Now we've finally finished everything. We've added removal and random creation o
 
 # Learning Audio
 So I did a little digging into other people who've done basically what I have set out to do, and it seems a little over my head. So, to prevent any roadblocks or sense of defeat, I'm going to branch into a different direction. Right now, I'm thinking it would be best to learn just the basics of the technology I'm trying to create. Since I don't exactly want to disassemble Spotify-TUI or spotify-player, I'll be spending this section learning to make the terminal play audio.
+
+## Getting Started
+I've started by setting up the code found on the rodio docs. Works like a charm when you're not in WSL. *I can't imagine why.* Anyways, it works great as-is if you're interested in hard-coding your music, and only listening to thirty seconds of one song. Next step is to get it to play the whole song, regardless of its length.
