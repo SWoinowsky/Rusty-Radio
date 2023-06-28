@@ -61,3 +61,7 @@ We've added some actual process to the Pets result match, creating a pair of chu
 
 ### Adding little interactions with the menu
 Now we've finally finished everything. We've added removal and random creation of pet objects. 
+
+
+# Learning Audio
+So I did a little digging into other people who've done basically what I have set out to do, and it seems a little over my head. So, to prevent any roadblocks or sense of defeat, I'm going to branch into a different direction. Right now, I'm thinking it would be best to learn just the basics of the technology I'm trying to create. Since I don't exactly want to disassemble Spotify-TUI or spotify-player, I'll be spending this section learning to make the terminal play audio.
