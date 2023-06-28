@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 use mp3_duration;
-
+use mp3_metadata;
 
 fn main() {
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
