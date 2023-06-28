@@ -68,3 +68,12 @@ So I did a little digging into other people who've done basically what I have se
 
 ## Getting Started
 I've started by setting up the code found on the rodio docs. Works like a charm when you're not in WSL. *I can't imagine why.* Anyways, it works great as-is if you're interested in hard-coding your music, and only listening to thirty seconds of one song. Next step is to get it to play the whole song, regardless of its length.
+
+### Audio Length Collection
+This is great! I found a library that can create a Duration type given a file. The tragedy here is that if I wanna make this thing useful as a music player, I think I'm gonna want more than that. My goal now is to find some library that shows media
+
+### Getting the Rest of It
+So it turns out, just like there is an "mp3_duration" crate, there is an "mp3_duration" crate. I don't think it'll work on non-mp3 files, but we're not exactly getting paid here. Baby steps. Next, we'll see about having it read multiple files.
+
+## Playing Multiple Songs
+Fantastic news. I've made the ugliest little algorithm on earth. I can't wait to clean it up. Regardless, I've got it playing an entire list of songs, so long as they are files. So now we have this super ugly for loop that can read mp3 files and occasionally find their audio tags. I suppose the next step would be to make sure it only works with mp3 files. And probably clean up main.

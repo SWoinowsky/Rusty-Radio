@@ -7,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 rodio = "0.17.1"
+mp3-duration = "0.1.10"
+mp3-metadata = "0.3.4"
